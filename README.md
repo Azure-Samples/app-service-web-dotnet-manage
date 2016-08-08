@@ -1,3 +1,9 @@
+---
+services: app-service
+platforms: dotnet
+author: devigned
+---
+
 # app-service-web-dotnet-manage
 This sample demonstrates how to manage your WebApps using the .NET SDK
 
