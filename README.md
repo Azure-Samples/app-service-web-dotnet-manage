@@ -1,6 +1,16 @@
 # app-service-web-dotnet-manage
 This sample demonstrates how to manage your WebApps using the .NET SDK
 
+**On this page**
+
+- [Run this sample](#run)
+- [What does Program.cs do?](#sample)
+    - [Create a server farm](#create-server-farm)
+    - [Create a website](#create-website)
+    - [Get website details](#details)
+    - [Delete a website](#delete)
+
+<a id="run"></a>
 ## Run this sample
 
 1. If you don't have it, install the [.NET Core SDK](https://www.microsoft.com/net/core).
@@ -36,3 +46,78 @@ This sample demonstrates how to manage your WebApps using the .NET SDK
     ```
     dotnet run
     ```
+
+<a id="sample"></a>
+## What does Program.cs do?
+
+`Main()` gets the environment variables that you set up for this sample and calls `RunSample`.
+`RunSample` starts by setting up a `WebSiteManagementClient` using those credentials.
+
+
+```csharp
+// Build the service credentials and Azure Resource Manager clients
+var serviceCreds = await ApplicationTokenProvider.LoginSilentAsync(tenantId, clientId, secret);
+var resourceClient = new ResourceManagementClient(serviceCreds);
+resourceClient.SubscriptionId = subscriptionId;
+var webClient = new WebSiteManagementClient(serviceCreds);
+webClient.SubscriptionId = subscriptionId;
+```
+
+The sample then sets up a resource group in which it will create the website.
+
+```csharp
+Random r = new Random();
+int postfix = r.Next(0, 1000000);
+
+var resourceGroupName = "sample-dotnet-app-service-group";
+var westus = "westus";
+var serverFarmName = "sample-server-farm";
+var siteName = "sample-site-name-" + postfix;
+
+// Create the resource group
+Write("Creating resource group: {0}", westus);
+resourceClient.ResourceGroups.CreateOrUpdate(resourceGroupName, new ResourceGroup { Location = westus});
+```
+
+<a id="create-server-farm"></a>
+### Create a server farm
+
+Create a server farm to host the website.
+
+```csharp
+var serverFarm = webClient.ServerFarms.CreateOrUpdateServerFarm(resourceGroupName, serverFarmName, new ServerFarmWithRichSku{
+    Location = westus,
+    Sku = new SkuDescription{
+        Name = "S1",
+        Capacity = 1,
+        Tier = "Standard"
+    }
+});
+```
+
+<a id="create-website"></a>
+### Create a website
+
+```csharp
+var site = webClient.Sites.CreateOrUpdateSite(resourceGroupName, siteName, new Site{
+    Location = westus,
+    ServerFarmId = serverFarm.Id
+});
+```
+
+<a id="details"></a>
+### Get details for the given website
+
+```csharp
+var gotSite = webClient.Sites.GetSite(resourceGroupName, siteName);
+```
+
+<a id="delete"></a>
+### Delete a website
+
+```csharp
+webClient.Sites.DeleteSite(resourceGroupName, siteName);
+```
+
+## More information
+Please refer to [Azure SDK for .NET](https://github.com/Azure/azure-sdk-for-net) for more information.
