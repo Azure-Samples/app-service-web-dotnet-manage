@@ -4,7 +4,8 @@ platforms: dotnet
 author: devigned
 ---
 
-# app-service-web-dotnet-manage
+# Manage your web apps with the .NET SDK for Azure
+
 This sample demonstrates how to manage your WebApps using the .NET SDK
 
 **On this page**
